@@ -1,4 +1,5 @@
 /* globals popover menu */
+
 const setStatus = status => {
 	AccountBox.setStatus(status);
 	RocketChat.callbacks.run('userStatusManuallySet', status);
@@ -9,6 +10,13 @@ const viewModeIcon = {
 	extended: 'th-list',
 	medium: 'list',
 	condensed: 'list-alt'
+};
+
+const moodIcon = {
+	smile: 'smile',
+  sad: 'sad',
+  neutral: 'neutral',
+	confused: 'confused'
 };
 
 const extendedViewOption = (user) => {
@@ -40,13 +48,87 @@ const toolbarButtons = (user) => {
 			toolbarEl.css('display', 'block');
 			toolbarEl.find('.rc-input__element').focus();
 		}
-	},
-	{
-		name: t('Directory'),
-		icon: 'globe',
-		action: () => {
-			menu.close();
-			FlowRouter.go('directory');
+  },
+  {
+    name: t('Mood'),
+		icon: () => RocketChat.getUserPreference(user, 'moodStatus') ? moodIcon[RocketChat.getUserPreference(user, 'moodStatus')] : moodIcon.smile,
+		action: (e) => {
+			const hideAvatarSetting = RocketChat.getUserPreference(user, 'sidebarHideAvatar');
+			const config = {
+				columns: [
+					{
+						groups: [
+							{
+								items: [
+									{
+										icon: moodIcon.smile,
+										name: t('Smile'),
+										modifier: RocketChat.getUserPreference(user, 'moodStatus') === 'smile' ? 'bold' : null,
+										action: () => {
+                      var smileCount = RocketChat.getUserPreference(user, 'smileMoodCount') ? RocketChat.getUserPreference(user, 'smileMoodCount') : 0;
+                      Meteor.call('saveUserPreferences', {moodStatus: 'smile', smileMoodCount: ++smileCount}, function(error) {
+												if (error) {
+													return handleError(error);
+												}
+											});
+										}
+									},
+									{
+										icon: moodIcon.sad,
+										name: t('Sad'),
+										modifier: RocketChat.getUserPreference(user, 'moodStatus') === 'sad' ? 'bold' : null,
+										action: () => {
+                      var sadCount = RocketChat.getUserPreference(user, 'sadMoodCount') ? RocketChat.getUserPreference(user, 'sadMoodCount') : 0;                      
+											Meteor.call('saveUserPreferences', {moodStatus: 'sad', sadMoodCount: ++sadCount}, function(error) { 
+												if (error) {
+													return handleError(error);
+												}
+											});
+										}
+                  },
+                  {
+										icon: moodIcon.neutral,
+                    name: t('Neutral'),
+										modifier: RocketChat.getUserPreference(user, 'moodStatus') === 'neutral' ? 'bold' : null,
+										action: () => {
+                      var neutralCount = RocketChat.getUserPreference(user, 'neutralMoodCount') ? RocketChat.getUserPreference(user, 'neutralMoodCount') : 0;                      
+											Meteor.call('saveUserPreferences', {moodStatus: 'neutral', neutralMoodCount: ++neutralCount}, function(error) {
+                        if (error) {
+													return handleError(error);
+												}
+											});
+										}
+                  },
+                  {
+										icon: moodIcon.confused,
+										name: t('Confused'),
+										modifier: RocketChat.getUserPreference(user, 'moodStatus') === 'confused' ? 'bold' : null,
+										action: () => {
+                      var confusedCount = RocketChat.getUserPreference(user, 'confusedMoodCount') ? RocketChat.getUserPreference(user, 'confusedMoodCount') : 0;                      
+											Meteor.call('saveUserPreferences', {moodStatus: 'confused', confusedMoodCount: ++confusedCount}, function(error) { 											
+                        if (error) {
+													return handleError(error);
+												}
+											});
+										}
+									}
+								]
+              },
+              {
+								items: [
+									{
+										pieChart: true
+									}
+								]
+							}
+						]
+					}
+				],
+				currentTarget: e.currentTarget,
+				offsetVertical: e.currentTarget.clientHeight + 10
+			};
+
+			popover.open(config);
 		}
 	},
 	{

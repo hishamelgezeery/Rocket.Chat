@@ -127,6 +127,9 @@ Package.onUse(function(api) {
 	api.addFiles('client/components/popupList.html', 'client');
 	api.addFiles('client/components/popupList.js', 'client');
 
+  api.addFiles('client/views/app/pieChart.html', 'client');
+	api.addFiles('client/views/app/pieChart.js', 'client');
+
 	api.addFiles('client/components/selectDropdown.html', 'client');
 	api.addFiles('client/components/selectDropdown.js', 'client');
 
